@@ -1,0 +1,108 @@
+{% extends "social/base.html" %}
+{% load static %}
+
+{% block title %}Post by {{ post.author.username }} - FeedFlip{% endblock %}
+
+{% block content %}
+<div class="post-detail-container">
+    {# Replicate the post card structure from home.html for consistency #}
+    <article class="post-card">
+        <header class="post-header">
+            <a href="{% url 'profile' post.author.username %}" class="author-info">
+                <img src="{{ post.author.profile.profile_picture.url|default:'/static/social/images/default.jpg' }}" alt="{{ post.author.username }}" class="author-avatar-small">
+                <span class="author-username">{{ post.author.username }}</span>
+            </a>
+            {% if post.author == request.user %}
+                <div class="post-options">
+                    <a href="{% url 'post_update' post.pk %}" class="post-action-subtle"><i class="fas fa-edit"></i> Edit</a>
+                    <a href="{% url 'post_delete' post.pk %}" class="post-action-subtle"><i class="fas fa-trash"></i> Delete</a>
+                </div>
+            {% endif %}
+        </header>
+
+        {% if post.image %}
+            <div class="post-image-container">
+               <img src="{{ post.image.url }}" alt="Post by {{ post.author.username }}" class="post-image">
+            </div>
+        {% endif %}
+
+        <div class="post-content-area">
+            <div class="post-actions-bar">
+                <form method="post" action="{% url 'like_post' post.pk %}" class="action-form like-form" data-post-id="{{ post.pk }}">
+                    {% csrf_token %}
+                    <button type="submit" name="action" value="{% if request.user in post.likes.all %}unlike{% else %}like{% endif %}"
+                            class="action-button {% if request.user in post.likes.all %}liked{% endif %}">
+                        <i class="{% if request.user in post.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                    </button>
+                </form>
+                <button class="action-button comment-focus-button" onclick="document.getElementById('id_text_comment_detail').focus();">
+                    <i class="far fa-comment"></i>
+                </button>
+                {# <button class="action-button"><i class="fas fa-share-square"></i></button> #}
+            </div>
+
+            {% if post.total_likes > 0 %}
+            <div class="post-likes-count">
+                <strong id="likes-display-{{ post.pk }}">{{ post.total_likes }}</strong> like{{ post.total_likes|pluralize }}
+            </div>
+            {% endif %}
+
+            <div class="post-caption full-caption"> {# Different class for full caption styling if needed #}
+                {# <a href="{% url 'profile' post.author.username %}" class="author-username-caption">{{ post.author.username }}</a> #}
+                {# Author username is already prominent in the header on detail page #}
+                <p>{{ post.content|linebreaksbr }}</p> {# Display full content #}
+            </div>
+            <small class="post-timestamp">{{ post.created_at|date:"F j, Y, P" }}</small> {# More detailed timestamp #}
+        </div>
+    </article> {# End of post-card for the main post content #}
+
+
+    {# Comments Section - Styled separately but related #}
+    <div class="comments-section-container" id="comments-section-{{post.pk}}">
+        <h3>Comments ({{ comments.count }})</h3>
+
+        {# Add Comment Form #}
+        {% if user.is_authenticated %}
+        <div class="add-comment-section detail-add-comment">
+            <form method="post" action="{% url 'add_comment' post.pk %}" class="comment-form-inline">
+                {% csrf_token %}
+                {{ comment_form.text.errors }}
+                <img src="{{ request.user.profile.profile_picture.url|default:'/static/social/images/default.jpg' }}" alt="Your avatar" class="commenter-avatar-small">
+                <input type="text" name="{{ comment_form.text.name }}" id="id_text_comment_detail"
+                       placeholder="Add a comment..." class="comment-input-inline" required
+                       value="{{ comment_form.text.value|default:'' }}">
+                <button type="submit" class="comment-submit-inline">Post</button>
+            </form>
+        </div>
+        {% else %}
+        <p><a href="{% url 'login' %}?next={{ request.path }}">Log in</a> to add a comment.</p>
+        {% endif %}
+
+        <div class="comments-list">
+            {% for comment in comments %}
+                <div class="comment-item">
+                    <a href="{% url 'profile' comment.author.username %}">
+                        <img src="{{ comment.author.profile.profile_picture.url|default:'/static/social/images/default.jpg' }}" alt="{{ comment.author.username }}" class="commenter-avatar-small">
+                    </a>
+                    <div class="comment-content">
+                        <p>
+                            <a href="{% url 'profile' comment.author.username %}" class="commenter-username">{{ comment.author.username }}</a>
+                            <span class="comment-text">{{ comment.text|linebreaksbr }}</span>
+                        </p>
+                        <small class="comment-timestamp">{{ comment.created_at|timesince }} ago</small>
+                    </div>
+                </div>
+            {% empty %}
+                {% if user.is_authenticated %}
+                <p class="no-comments-message">No comments yet. Be the first to comment!</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+    {# You can include the same AJAX like script here if you want #}
+    {# Or a more generic script that handles likes on both home and detail #}
+{% endblock %}

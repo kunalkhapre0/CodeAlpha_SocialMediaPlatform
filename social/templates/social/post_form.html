@@ -1,0 +1,82 @@
+{% extends "social/base.html" %}
+{% load static %}
+
+{% block title %}{{ type|default:"Create" }} Post - FeedFlip{% endblock %}
+
+{% block content %}
+<div class="form-container post-form-container">
+    <h2>{{ type|default:"Create" }} Post</h2>
+    <form method="post" enctype="multipart/form-data" class="styled-form">
+        {% csrf_token %}
+
+        {# Loop through form fields for better control, or use form.as_p and style globally #}
+        {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {% if field.name == 'content' %}
+                    {{ field }} {# Render textarea with its default widget or custom from forms.py #}
+                {% elif field.field.widget.input_type == 'file' %}
+                    <div class="custom-file-input">
+                        {{ field }}
+                        <label for="{{ field.id_for_label }}" class="custom-file-label">
+                            <i class="fas fa-upload"></i> Choose image...
+                        </label>
+                        <span class="file-name-display">No file chosen</span>
+                    </div>
+                {% else %}
+                    {{ field }}
+                {% endif %}
+                {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div class="form-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="button submit-button">{{ type|default:"Create" }}</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Custom file input display
+    const fileInputs = document.querySelectorAll('input[type="file"].custom-file-input-field'); // Add this class to your file input field if not directly targeting
+    fileInputs.forEach(function(input) {
+        // Find the associated label and file name display span, assuming they are siblings or close
+        const container = input.closest('.custom-file-input');
+        if (!container) return;
+
+        const fileNameDisplay = container.querySelector('.file-name-display');
+        
+        input.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                if (fileNameDisplay) fileNameDisplay.textContent = e.target.files[0].name;
+            } else {
+                if (fileNameDisplay) fileNameDisplay.textContent = 'No file chosen';
+            }
+        });
+    });
+
+    // If you used {{ field }} for the file input, you might need to add a class to it via forms.py widget attrs
+    // or select it more generically like:
+    const generalFileInputs = document.querySelectorAll('.custom-file-input input[type="file"]');
+    generalFileInputs.forEach(function(input) {
+        const container = input.closest('.custom-file-input');
+        if (!container) return;
+        const fileNameDisplay = container.querySelector('.file-name-display');
+        
+        input.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                if (fileNameDisplay) fileNameDisplay.textContent = e.target.files[0].name;
+            } else {
+                if (fileNameDisplay) fileNameDisplay.textContent = 'No file chosen';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "social/base.html" %}
+{% load static %}
+
+{% block title %}Login - FeedFlip{% endblock %}
+
+{% block content %}
+<div class="form-container auth-form-container"> {# General container for auth forms #}
+    <h2>Login to FeedFlip</h2>
+    <form method="post" class="styled-form">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div class="form-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="button submit-button">Login</button>
+    </form>
+    <div class="auth-links">
+        <p><a href="{% url 'password_reset' %}">Forgot password?</a></p>
+        <p>Don't have an account? <a href="{% url 'register' %}">Register here</a></p>
+    </div>
+</div>
+{% endblock %}

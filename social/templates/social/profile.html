@@ -1,0 +1,117 @@
+{% extends "social/base.html" %}
+{% load static %}
+
+{% block title %}{{ profile_user.username }}'s Profile - FeedFlip{% endblock %}
+
+{% block content %}
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="profile-picture-container">
+                {% if profile_user.profile.profile_picture %}
+                    <img src="{{ profile_user.profile.profile_picture.url }}" alt="{{ profile_user.username }}'s profile picture" class="profile-picture-large">
+                {% else %}
+                    <img src="{% static 'social/images/default.jpg' %}" alt="Default profile picture" class="profile-picture-large">
+                {% endif %}
+            </div>
+            <div class="profile-info-main">
+                <h2>{{ profile_user.username }}</h2>
+                {% if profile_user.first_name or profile_user.last_name %}
+                    <p class="profile-name">{{ profile_user.first_name }} {{ profile_user.last_name }}</p>
+                {% endif %}
+                <p class="profile-joined">Joined: {{ profile_user.date_joined|date:"F j, Y" }}</p>
+
+                <div class="profile-stats">
+                    <span><strong>{{ profile_user.posts.count }}</strong> Posts</span> 
+                    <span><strong id="followers-count-{{ profile_user.id }}">{{ profile_user.follower_set.count }}</strong> Followers</span> 
+                    <span><strong>{{ profile_user.following_set.count }}</strong> Following</span>
+                </div>
+
+                <div class="profile-actions">
+                    {% if user.is_authenticated %}
+                        {% if user == profile_user %}
+                            <a href="{% url 'profile_edit' %}" class="button edit-profile-button">Edit Profile</a>
+                        {% else %}
+                            <form method="post" action="{% url 'toggle_follow' profile_user.username %}" class="inline-form">
+                                {% csrf_token %}
+                                {% if is_following %} {# Assumes is_following is passed from view #}
+                                    <button type="submit" class="button unfollow-button">Unfollow</button>
+                                {% else %}
+                                    <button type="submit" class="button follow-button">Follow</button>
+                                {% endif %}
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-bio">
+            <h4>Bio</h4>
+            <p>{{ profile_user.profile.bio|linebreaksbr|default:"This user has not set a bio yet." }}</p>
+        </div>
+
+        <hr class="profile-divider">
+
+        <div class="user-posts-section">
+            <h3>Posts by {{ profile_user.username }}</h3>
+            {% if profile_user.posts.all %}
+                {% for post in profile_user.posts.all %}
+                    <article class="post-summary">
+                        <div class="post-summary-header">
+                            <div class="post-meta">
+                                <a href="{% url 'post_detail' post.pk %}">
+                                    Posted {{ post.created_at|timesince }} ago
+                                </a>
+                            </div>
+                            {% if post.author == request.user %}
+                                <div class="post-actions"> {# CSS class for edit/delete links container #}
+                                    <a href="{% url 'post_update' post.pk %}" class="post-action-link"><i class="fas fa-edit"></i> Edit</a>
+                                    <a href="{% url 'post_delete' post.pk %}" class="post-action-link"><i class="fas fa-trash"></i> Delete</a>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if post.image %}
+                            <a href="{% url 'post_detail' post.pk %}">
+                                <img src="{{ post.image.url }}" alt="Image for post by {{ post.author.username }}" class="post-summary-image">
+                            </a>
+                        {% endif %}
+
+                        <div class="post-summary-content">
+                             <p>{{ post.content|linebreaksbr|truncatewords:40 }}
+                                {% if post.content|wordcount > 40 %}
+                                    <a href="{% url 'post_detail' post.pk %}">read more</a>
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        {# THIS IS THE REFINED FOOTER SECTION TO MATCH MODERN STYLING INTENT #}
+                        <footer class="post-summary-footer">
+                            <a href="{% url 'post_detail' post.pk %}#comments-section-{{post.pk}}" class="action-button">
+                                <i class="far fa-comment"></i> <span class="action-text">{{ post.comments.count }}</span>
+                            </a>
+
+                            {% if user.is_authenticated %}
+                                <form method="post" action="{% url 'like_post' post.pk %}" class="action-form like-form">
+                                    {% csrf_token %}
+                                    <button type="submit" name="action" value="{% if request.user in post.likes.all %}unlike{% else %}like{% endif %}"
+                                            class="action-button {% if request.user in post.likes.all %}liked{% endif %}">
+                                        <i class="{% if request.user in post.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                                        <span class="action-text" id="likes-count-display-{{ post.pk }}">{{ post.total_likes }}</span>
+                                    </button>
+                                </form>
+                            {% else %} {# Show like count for non-authenticated users without a button #}
+                                <span class="action-button-placeholder"> {# Use a span that can be styled like an action-button but isn't interactive #}
+                                    <i class="far fa-heart"></i> <span class="action-text">{{ post.total_likes }}</span>
+                                </span>
+                            {% endif %}
+                            {# Add other action buttons like share here if needed, using the 'action-button' class #}
+                        </footer>
+                    </article>
+                {% endfor %}
+            {% else %}
+                <p>{{ profile_user.username }} hasn't posted anything yet.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

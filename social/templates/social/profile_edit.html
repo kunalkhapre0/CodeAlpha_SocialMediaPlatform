@@ -1,0 +1,82 @@
+{% extends "social/base.html" %}
+{% load static %}
+
+{% block title %}Edit Profile - FeedFlip{% endblock %}
+
+{% block content %}
+<div class="form-container profile-edit-form-container"> {# Specific class if needed #}
+    <h2>Edit Profile</h2>
+    <form method="post" enctype="multipart/form-data" class="styled-form">
+        {% csrf_token %}
+
+        {# Assuming p_form is your ProfileUpdateForm instance from the view #}
+        {% for field in p_form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+
+                {% if field.name == 'profile_picture' %}
+                    {# Display current image if it exists #}
+                    {% if field.value %}
+                        <div class="current-image-preview" style="margin-bottom: 10px;">
+                            <p style="font-size: 0.85em; margin-bottom: 5px;">Currently:</p>
+                            <img src="{{ field.value.url }}" alt="Current profile picture" style="max-width: 100px; max-height: 100px; border-radius: 50%; margin-bottom: 5px; display: block;">
+                        </div>
+                    {% endif %}
+                    {# Custom styling for file input #}
+                    <div class="custom-file-input">
+                        {{ field }} {# This renders the input, "Clear" checkbox etc. #}
+                        {# If you want a prettier button, you might need more complex widget overriding or JS #}
+                        {# For now, we'll let Django render its default ClearableFileInput parts #}
+                        {# and rely on the browser's default "Choose File" button styling or the #}
+                        {# .custom-file-label approach if you adapt it for this field too #}
+                    </div>
+                     <span class="file-name-display" id="profile-pic-filename">
+                        {% if not field.value %}No file chosen{% endif %}
+                        {# This span won't auto-update with this simple rendering of ClearableFileInput #}
+                        {# but it's a place for it if you add JS later #}
+                    </span>
+
+
+                {% elif field.name == 'bio' %}
+                    {{ field }} {# Textarea will pick up general textarea styles #}
+                {% else %}
+                    {{ field }} {# For any other fields you might add to ProfileUpdateForm #}
+                {% endif %}
+
+                {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div class="form-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <button type="submit" class="button submit-button">Update Profile</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+{# If you want the filename to display for the profile picture, similar JS is needed #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Target the profile picture input specifically if it has a unique ID or class from forms.py
+    // Django's ClearableFileInput is a bit more complex than a simple file input.
+    // Let's assume your input field for profile_picture has an id like 'id_profile_picture'
+    const profilePicInput = document.getElementById('id_profile_picture'); // Check the actual ID in browser dev tools
+    const profilePicFileNameDisplay = document.getElementById('profile-pic-filename');
+
+    if (profilePicInput && profilePicFileNameDisplay) {
+        profilePicInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files.length > 0) {
+                profilePicFileNameDisplay.textContent = e.target.files[0].name;
+            } else if (!document.querySelector('.current-image-preview img')) { 
+                // Only reset if there's no current image (or if clear is checked, more complex)
+                profilePicFileNameDisplay.textContent = 'No file chosen';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

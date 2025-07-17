@@ -1,0 +1,123 @@
+{% extends "social/base.html" %}
+{% block content %}
+    <div class="feed-container">
+        {% for post in posts %}
+            <article class="post-card">
+                <header class="post-header">
+                    <a href="{% url 'profile' post.author.username %}" class="author-info">
+                        <img src="{{ post.author.profile.profile_picture.url|default:'/static/social/images/default.jpg' }}" alt="{{ post.author.username }}" class="author-avatar-small">
+                        <span class="author-username">{{ post.author.username }}</span>
+                    </a>
+                    {% if post.author == request.user %}
+                        <div class="post-options">
+                            <!-- Dropdown or simple links for edit/delete -->
+                            <a href="{% url 'post_update' post.pk %}" class="post-action-subtle"><i class="fas fa-edit"></i></a>
+                            <a href="{% url 'post_delete' post.pk %}" class="post-action-subtle"><i class="fas fa-trash"></i></a>
+                        </div>
+                    {% endif %}
+                </header>
+
+                {% if post.image %}
+                    <div class="post-image-container">
+                        <a href="{% url 'post_detail' post.pk %}">
+                           <img src="{{ post.image.url }}" alt="Post by {{ post.author.username }}" class="post-image">
+                        </a>
+                    </div>
+                {% endif %}
+
+                <div class="post-content-area">
+                    <div class="post-actions-bar">
+                        <form method="post" action="{% url 'like_post' post.pk %}" class="action-form like-form" data-post-id="{{ post.pk }}">
+                            {% csrf_token %}
+                            <button type="submit" name="action" value="{% if request.user in post.likes.all %}unlike{% else %}like{% endif %}"
+                                    class="action-button {% if request.user in post.likes.all %}liked{% endif %}">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </form>
+                        <a href="{% url 'post_detail' post.pk %}#comments-section-{{post.pk}}" class="action-button">
+                            <i class="far fa-comment"></i> {# Use far for outline, fas for solid #}
+                        </a>
+                        <!-- <button class="action-button"><i class="fas fa-share-square"></i></button> --> {# Share button - more complex #}
+                    </div>
+
+                    {% if post.total_likes > 0 %}
+                    <div class="post-likes-count">
+                        <strong id="likes-display-{{ post.pk }}">{{ post.total_likes }}</strong> like{{ post.total_likes|pluralize }}
+                    </div>
+                    {% endif %}
+
+                    <div class="post-caption">
+                        <a href="{% url 'profile' post.author.username %}" class="author-username-caption">{{ post.author.username }}</a>
+                        <span>{{ post.content|linebreaksbr }}</span>
+                    </div>
+
+                    {% if post.comments.count > 0 %}
+                        <a href="{% url 'post_detail' post.pk %}#comments-section-{{post.pk}}" class="view-all-comments">
+                            View all {{ post.comments.count }} comment{{ post.comments.count|pluralize }}
+                        </a>
+                    {% endif %}
+                     <small class="post-timestamp">{{ post.created_at|timesince }} ago</small>
+                </div>
+
+                <div class="add-comment-section">
+                    <form method="post" action="{% url 'add_comment' post.pk %}" class="comment-form-inline">
+                        {% csrf_token %}
+                        {{ comment_form.text.errors }}
+                        <input type="text" name="{{ comment_form.text.name }}" id="id_text_post_{{ post.pk }}"
+                               placeholder="Add a comment..." class="comment-input-inline" required>
+                        <button type="submit" class="comment-submit-inline">Post</button>
+                    </form>
+                </div>
+            </article>
+        {% empty %}
+            <p class="empty-feed-message">No posts yet. Follow some users or create your own post!</p>
+        {% endfor %}
+    </div>
+{% endblock %}
+
+{% block scripts_extra %}
+    {# Add JS for AJAX likes/comments here if you implement it #}
+    <!--
+    <script>
+    // Basic AJAX Like Example (conceptual, needs more robust error handling etc.)
+    document.querySelectorAll('.like-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const postId = this.dataset.postId;
+            const actionButton = this.querySelector('button[name="action"]');
+            const currentAction = actionButton.value;
+            const newAction = currentAction === 'like' ? 'unlike' : 'like';
+            const likesDisplay = document.getElementById(`likes-display-${postId}`);
+            const heartIcon = actionButton.querySelector('i');
+
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this), // Sends CSRF token and action
+                headers: {
+                    'X-CSRFToken': this.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json()) // Assuming your like_post_view returns JSON
+            .then(data => {
+                if (data.status === 'ok') {
+                    actionButton.value = newAction;
+                    if (newAction === 'unlike') { // Was liked, now unliked
+                        actionButton.classList.add('liked');
+                        heartIcon.classList.remove('far'); // if using outline for unliked
+                        heartIcon.classList.add('fas');   // solid for liked
+                    } else { // Was unliked, now liked
+                        actionButton.classList.remove('liked');
+                        heartIcon.classList.remove('fas');
+                        heartIcon.classList.add('far');
+                    }
+                    if (likesDisplay) {
+                        likesDisplay.textContent = data.likes_count;
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+    </script>
+    -->
+{% endblock %}

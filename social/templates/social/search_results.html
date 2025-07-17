@@ -1,0 +1,48 @@
+{% extends "social/base.html" %}
+{% load static %}
+
+{% block title %}Search Results for "{{ query }}" - FeedFlip{% endblock %}
+
+{% block content %}
+<div class="search-results-container">
+    <h2>Search Results</h2>
+
+    {% if query %}
+        <p class="results-for">Showing results for: <strong>"{{ query }}"</strong></p>
+
+        {% if results %}
+            <ul class="user-results-list">
+                {% for result_item in results %} {# Iterate through the list of dictionaries #}
+                    <li class="user-result-item">
+                        <a href="{% url 'profile' result_item.user.username %}" class="user-result-link">
+                            <img src="{{ result_item.user.profile.profile_picture.url|default:'/static/social/images/default.jpg' }}"
+                                 alt="{{ result_item.user.username }}" class="user-result-avatar">
+                            <div class="user-result-info">
+                                <span class="user-result-username">{{ result_item.user.username }}</span>
+                                {% if result_item.user.first_name or result_item.user.last_name %}
+                                    <span class="user-result-fullname">{{ result_item.user.first_name }} {{ result_item.user.last_name }}</span>
+                                {% endif %}
+                            </div>
+                        </a>
+                        {% if user.is_authenticated and user != result_item.user %}
+                            <form method="post" action="{% url 'toggle_follow' result_item.user.username %}" class="inline-form follow-search-result">
+                                {% csrf_token %}
+                                {# Use the pre-calculated boolean from the context #}
+                                {% if result_item.is_followed_by_current_user %}
+                                    <button type="submit" class="button-outline-small unfollow">Unfollow</button> {# Added 'unfollow' class for potential styling #}
+                                {% else %}
+                                    <button type="submit" class="button-primary-small follow">Follow</button> {# Added 'follow' class #}
+                                {% endif %}
+                            </form>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No users found matching your search criteria.</p>
+        {% endif %}
+    {% else %}
+        <p>Please enter a search term to find users.</p>
+    {% endif %}
+</div>
+{% endblock %}
