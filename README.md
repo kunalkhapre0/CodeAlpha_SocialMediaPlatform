@@ -1,8 +1,8 @@
-# FeedFlip - Social Media Platform (Task 2)
+# * FeedFlip - Social Media Platform (Task 2)
 
 FeedFlip is a mini social media platform built with Python and Django as part of the CodeAlpha Full Stack Development Internship.
 
-## Features
+## Features:
 
 *   User Registration and Login
 *   User Profiles with Bio and Profile Pictures
@@ -13,11 +13,11 @@ FeedFlip is a mini social media platform built with Python and Django as part of
 *   User Search Functionality
 *   Responsive Design for Desktop and Mobile
 
-  ## Live Demo
+  ## Live Demo:
 
 *   **Live URL:** - [DEMO LINK](https://feedflip.pythonanywhere.com/)
 
-## Technologies Used
+## Technologies Used:
 
 *   **Backend:** Python, Django
 *   **Frontend:** HTML, CSS, JavaScript
@@ -28,7 +28,7 @@ FeedFlip is a mini social media platform built with Python and Django as part of
 *   **Frontend Libraries/Frameworks (if any):**
     *   Font Awesome (for icons)
 
-## Setup and Run Locally
+## Setup and Run Locally:
 
 1.  **Clone the repository:**
     ```bash
@@ -68,6 +68,11 @@ FeedFlip is a mini social media platform built with Python and Django as part of
     ```
     The application will be available at `http://127.0.0.1:8000/`.
 
+## Author:
+###  Kunal Khapre
+*   [LinkedIn profile](https://www.linkedin.com/in/kunal-khapre-431096369)
+*   [GitHub profile](https://github.com/kunalkhapre0)
+
 ## Screenshots 
 
 ![1](https://github.com/user-attachments/assets/f326fa81-e3fd-44d7-9362-d367ad735920)
@@ -81,9 +86,3 @@ FeedFlip is a mini social media platform built with Python and Django as part of
 ![5](https://github.com/user-attachments/assets/f81fc21a-15f1-488b-b9c6-0bae65c780c6)
 
 ![6](https://github.com/user-attachments/assets/73c9d65b-355a-444b-9013-6767ae5ec8d2)
-
-## Author
-
-*   Muhammed Basil
-*   [LinkedIn profile](https://www.linkedin.com/in/muhammed-basil-a83443317/)
-*   [GitHub profile](https://github.com/diceflip)
