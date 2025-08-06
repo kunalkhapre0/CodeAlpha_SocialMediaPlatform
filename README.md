@@ -86,3 +86,5 @@ FeedFlip is a mini social media platform built with Python and Django as part of
 ![5](https://github.com/user-attachments/assets/f81fc21a-15f1-488b-b9c6-0bae65c780c6)
 
 ![6](https://github.com/user-attachments/assets/73c9d65b-355a-444b-9013-6767ae5ec8d2)
+
+
