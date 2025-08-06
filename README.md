@@ -68,11 +68,6 @@ FeedFlip is a mini social media platform built with Python and Django as part of
     ```
     The application will be available at `http://127.0.0.1:8000/`.
 
-## Author:
-###  Kunal Khapre
-*   [LinkedIn profile](https://www.linkedin.com/in/kunal-khapre-431096369)
-*   [GitHub profile](https://github.com/kunalkhapre0)
-
 ## Screenshots 
 
 ![1](https://github.com/user-attachments/assets/f326fa81-e3fd-44d7-9362-d367ad735920)
